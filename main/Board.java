@@ -16,10 +16,10 @@ public class Board {
             for (int col = 0; col < MAX_COL; col++) {
                 if ((row + col) % 2 == 0) {
                     // Light square color
-                    g2.setColor(new Color(210, 165, 125));
+                    g2.setColor(new Color(0, 100, 0));
                 } else {
                     // Dark square color
-                    g2.setColor(new Color(175, 115, 70));
+                    g2.setColor(new Color(255, 255, 255));
                 }
                 g2.fillRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
             }
