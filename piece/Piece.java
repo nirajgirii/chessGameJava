@@ -3,6 +3,7 @@ package piece;
 import main.Board;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
@@ -13,8 +14,7 @@ public class Piece {
     public int col, row, preCol, preRow;
     public int color;
 
-
-    public Piece(int color,  int col, int row) {
+    public Piece(int color, int col, int row) {
         this.color = color;
         this.col = col;
         this.row = row;
@@ -26,10 +26,13 @@ public class Piece {
 
     public BufferedImage getImage(String imagePath) {
         BufferedImage image = null;
-        try{
-            image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(imagePath + " .png")));
+        try {
+            image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        if (image == null) {
+            throw new RuntimeException("Image not found: " + imagePath);
         }
         return image;
     }
@@ -40,5 +43,9 @@ public class Piece {
 
     public int getY(int row) {
         return row * Board.SQUARE_SIZE;
+    }
+
+    public void draw(Graphics2D g2) {
+        g2.drawImage(image, x, y, Board.SQUARE_SIZE, Board.SQUARE_SIZE, null);
     }
 }
