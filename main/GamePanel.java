@@ -2,10 +2,7 @@ package main;
 
 import piece.*;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
@@ -17,10 +14,12 @@ public class GamePanel extends JPanel implements Runnable {
     final int FPS = 60;
     Thread gameThread;
     Board board = new Board();
+    Mouse mouse = new Mouse();
 
     //PIECES
     public static ArrayList<Piece> pieces = new ArrayList<>();
     public static ArrayList<Piece> simPieces = new ArrayList<>();
+    Piece activePiece;
 
 
     //COLOR of PIECES
@@ -31,6 +30,8 @@ public class GamePanel extends JPanel implements Runnable {
     public GamePanel() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(Color.BLACK);
+        addMouseMotionListener(mouse);
+        addMouseListener(mouse);
 
         setPieces();
         copyPieces(pieces, simPieces);
@@ -74,8 +75,6 @@ public class GamePanel extends JPanel implements Runnable {
         pieces.add(new Queen(WHITE, 3, 7));
 
 
-
-
         //-------------------------------- BLACK TEAM --------------------------------//
 
         // BLACK PAWN
@@ -109,7 +108,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
 
-    private void copyPieces(ArrayList<Piece>  source, ArrayList<Piece> target) {
+    private void copyPieces(ArrayList<Piece> source, ArrayList<Piece> target) {
         target.clear();
         target.addAll(source);
     }
@@ -139,6 +138,32 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     private void update() {
+        if (mouse.pressed) {
+            if (activePiece == null) {
+                for (Piece piece : simPieces) {
+                    if (piece.color == currentColor && piece.col == mouse.x / Board.SQUARE_SIZE && piece.row == mouse.y / Board.SQUARE_SIZE) {
+                        activePiece = piece;
+                    }
+                }
+            } else {
+                simulate();
+            }
+        }
+
+        if(mouse.pressed == false){
+            if(activePiece != null){
+                    activePiece.updatePosition();
+                    activePiece = null;
+            }
+        }
+
+    }
+
+    private void simulate() {
+        activePiece.x = mouse.x - Board.HALF_SQUARE_SIZE;
+        activePiece.y = mouse.y - Board.HALF_SQUARE_SIZE;
+        activePiece.col = activePiece.getCol(activePiece.x);
+        activePiece.row = activePiece.getRow(activePiece.y);
     }
 
     public void paintComponent(Graphics g) {
@@ -149,10 +174,21 @@ public class GamePanel extends JPanel implements Runnable {
         // Call Board draw method
         board.draw(g2);
 
-
         //Pieces
-        for(Piece p: simPieces){
+        for (Piece p : simPieces) {
             p.draw(g2);
+        }
+
+        if (activePiece != null) {
+            g2.setColor(new Color(255, 165, 0));
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .7f));
+
+            // Highlight the current position of the active piece
+            g2.fillRect(activePiece.col * Board.SQUARE_SIZE, activePiece.row * Board.SQUARE_SIZE, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+
+            // Reset transparency and draw the piece
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+            activePiece.draw(g2);
         }
     }
 
