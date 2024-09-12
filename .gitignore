@@ -1,4 +1,10 @@
 *.class
+# Ignore IntelliJ IDEA project files
+.idea/
+
+# Ignore build output folder
 /out/
 
+# Ignore OS-specific files
+*.DS_Store
 chessGameJava.iml
