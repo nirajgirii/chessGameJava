@@ -27,6 +27,10 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int BLACK = 1;
     int currentColor = WHITE;
 
+    //BOOLEANS
+    boolean canMove;
+    boolean validSquare;
+
     public GamePanel() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(Color.BLACK);
@@ -115,27 +119,34 @@ public class GamePanel extends JPanel implements Runnable {
 
     @Override
     public void run() {
-
-        // GAME LOOP
-
         double drawInterval = 1000000000 / FPS;
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
+        long timer = 0;
+        int frames = 0;
 
         while (gameThread != null) {
             currentTime = System.nanoTime();
-
             delta += (currentTime - lastTime) / drawInterval;
+            timer += (currentTime - lastTime);
             lastTime = currentTime;
 
             if (delta >= 1) {
                 update();
                 repaint();
                 delta--;
+                frames++;
+            }
+
+            if (timer >= 1000000000) {
+                System.out.println("FPS: " + frames);
+                frames = 0;
+                timer = 0;
             }
         }
     }
+
 
     private void update() {
         if (mouse.pressed) {
@@ -150,20 +161,46 @@ public class GamePanel extends JPanel implements Runnable {
             }
         }
 
-        if(mouse.pressed == false){
-            if(activePiece != null){
+        if (mouse.pressed == false) {
+            if (activePiece != null) {
+                if (validSquare) {
+                    // MOVE CONFIRMED
+
+                    // Update the piece list in case a piece has been captured and removed during the simulation
+                    copyPieces(simPieces, pieces);
                     activePiece.updatePosition();
+                } else {
+                    // The move is not valid so reset everything
+                    copyPieces(pieces, simPieces);
+                    activePiece.resetPosition();
                     activePiece = null;
+                }
             }
         }
 
     }
 
     private void simulate() {
+
+        canMove = false;
+        validSquare = false;
+
+        // Reset the piece list in every loop
+        // This is basically for restoring the removed piece during the simulation
+
         activePiece.x = mouse.x - Board.HALF_SQUARE_SIZE;
         activePiece.y = mouse.y - Board.HALF_SQUARE_SIZE;
         activePiece.col = activePiece.getCol(activePiece.x);
         activePiece.row = activePiece.getRow(activePiece.y);
+
+        //Check if the piece is hovering over a reachable square
+        if (activePiece.canMove(activePiece.col, activePiece.row)) {
+            canMove = true;
+            if (activePiece.hittingP != null) {
+                simPieces.remove(activePiece.hittingP.getIndex());
+            }
+            validSquare = true;
+        }
     }
 
     public void paintComponent(Graphics g) {
@@ -180,14 +217,18 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         if (activePiece != null) {
-            g2.setColor(new Color(255, 165, 0));
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .7f));
 
-            // Highlight the current position of the active piece
-            g2.fillRect(activePiece.col * Board.SQUARE_SIZE, activePiece.row * Board.SQUARE_SIZE, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+            if (canMove) {
+                g2.setColor(new Color(255, 165, 0));
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .7f));
 
-            // Reset transparency and draw the piece
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+                // Highlight the current position of the active piece
+                g2.fillRect(activePiece.col * Board.SQUARE_SIZE, activePiece.row * Board.SQUARE_SIZE, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+
+                // Reset transparency and draw the piece
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+            }
+
             activePiece.draw(g2);
         }
     }
