@@ -13,4 +13,15 @@ public class Bishop extends Piece {
             image = getImage("/res/piece/bishop_black.png");
         }
     }
+    public boolean canMove(int targetCol, int targetRow) {
+        if (isWithinBoard(targetCol, targetRow) && !isSameSquare(targetCol, targetRow)) {
+            // Rook can move as long as either its col or row is the same
+            if (Math.abs(targetCol - preCol) == Math.abs(targetRow - preRow)) {
+                if (isValidSquare(targetCol, targetRow) && !pieceIsOnDiagonalLine(targetCol, targetRow)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
