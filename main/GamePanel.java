@@ -8,6 +8,16 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable {
+    private String player1Name;
+    private String player2Name;
+
+    public void setPlayer1Name(String player1Name) {
+        this.player1Name = player1Name;
+    }
+
+    public void setPlayer2Name(String player2Name) {
+        this.player2Name = player2Name;
+    }
 
     public static final int WIDTH = 1300;
     public static final int HEIGHT = 800;
@@ -588,13 +598,13 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else {
             if (currentColor == WHITE) {
-                g2.drawString("White's Turn", 840, 550);
+                g2.drawString( player1Name+ "'s Turn", 840, 550);
                 if (checkingPiece != null && checkingPiece.color == BLACK) {
                     g2.setColor(Color.red);
                     g2.drawString("The King is in check", 840, 650);
                 }
             } else {
-                g2.drawString("Black's Turn", 840, 250);
+                g2.drawString( player2Name +"'s Turn", 840, 250);
                 if (checkingPiece != null && checkingPiece.color == WHITE) {
                     g2.setColor(Color.red);
                     g2.drawString("The King is in check", 840, 100);
@@ -605,9 +615,9 @@ public class GamePanel extends JPanel implements Runnable {
         if (gameOver) {
             String s = "";
             if (currentColor == WHITE) {
-                s = "White Wins";
+                s = player1Name + " Wins";
             } else {
-                s = "Black Wins";
+                s = player2Name+ " Wins";
             }
             g2.setFont(new Font("Times New Roman", Font.PLAIN, 90));
             g2.setColor(Color.GREEN);
