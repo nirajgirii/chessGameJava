@@ -8,3 +8,5 @@
 # Ignore OS-specific files
 *.DS_Store
 chessGameJava.iml
+
+main/DatabaseInformation.java
