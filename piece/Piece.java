@@ -8,9 +8,21 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Piece {
+    public ArrayList<Point> getPossibleMoves() {
+        ArrayList<Point> moves = new ArrayList<>();
+        for (int col = 0; col < 8; col++) {
+            for (int row = 0; row < 8; row++) {
+                if (canMove(col, row)) {
+                    moves.add(new Point(col, row));
+                }
+            }
+        }
+        return moves;
+    }
     public Type type;
     public BufferedImage image;
     public int x, y;
