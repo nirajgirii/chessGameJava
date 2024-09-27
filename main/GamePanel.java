@@ -573,13 +573,13 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         if (activePiece != null) {
-            g2.setColor(new Color(10, 246, 24));
+            g2.setColor(new Color(255, 165, 0));
             for (Point move : possibleMoves) {
                 g2.fillOval(
                         move.x * Board.SQUARE_SIZE + Board.SQUARE_SIZE / 2 - Board.SQUARE_SIZE / 8,
                         move.y * Board.SQUARE_SIZE + Board.SQUARE_SIZE / 2 - Board.SQUARE_SIZE / 8,
-                        Board.SQUARE_SIZE / 4,
-                        Board.SQUARE_SIZE / 4
+                        Board.SQUARE_SIZE / 5,
+                        Board.SQUARE_SIZE / 5
                 );
             }
 
