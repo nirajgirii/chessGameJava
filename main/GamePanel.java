@@ -5,12 +5,16 @@ import piece.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class GamePanel extends JPanel implements Runnable {
     private int promotionCol;
     private int promotionRow;
     private int promotionColor;
+
+    //Three Dot options
+    private JPopupMenu optionsMenu;
+    private JButton optionsButton;
 
     private boolean pieceSelected = false;
     private ArrayList<Point> possibleMoves = new ArrayList<>();
@@ -58,6 +62,7 @@ public class GamePanel extends JPanel implements Runnable {
         setBackground(Color.BLACK);
         addMouseMotionListener(mouse);
         addMouseListener(mouse);
+        createOptionsMenu();
 
         setPieces();
         copyPieces(pieces, simPieces);
@@ -131,6 +136,96 @@ public class GamePanel extends JPanel implements Runnable {
         pieces.add(new Queen(BLACK, 3, 0));
 
     }
+
+    // Three Dot options menu
+    private void createOptionsMenu() {
+        optionsMenu = new JPopupMenu();
+        JMenuItem restartGame = new JMenuItem("Restart Game");
+        JMenuItem newGame = new JMenuItem("Start New Game");
+        JMenuItem logout = new JMenuItem("Logout");
+
+        restartGame.addActionListener(e -> {
+            restartGame();
+        });
+
+        newGame.addActionListener(e -> {
+            startNewGame();
+        });
+
+        logout.addActionListener(e -> {
+            logout();
+        });
+
+        optionsMenu.add(restartGame);
+        optionsMenu.add(newGame);
+        optionsMenu.add(logout);
+
+        optionsButton = new JButton("⋮");
+        optionsButton.setBounds(WIDTH - 50, 10, 40, 40);
+        optionsButton.addActionListener(e -> {
+            optionsMenu.show(optionsButton, 0, optionsButton.getHeight());
+        });
+
+        setLayout(null);
+        add(optionsButton);
+    }
+
+    private void restartGame() {
+        // Reset the game state
+        currentColor = WHITE;
+        gameOver = false;
+        stalemate = false;
+        promotion = false;
+        activePiece = null;
+        checkingPiece = null;
+        castlingPiece = null;
+        pieceSelected = false;
+        possibleMoves.clear();
+
+        // Clear and reset pieces
+        pieces.clear();
+        simPieces.clear();
+        setPieces();
+        copyPieces(pieces, simPieces);
+
+        // Repaint the panel
+        repaint();
+    }
+
+    private void startNewGame() {
+        // Similar to restartGame, but you might want to prompt for new player names
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        String player1 = JOptionPane.showInputDialog(frame, "Enter name for Player 1 (White):");
+        String player2 = JOptionPane.showInputDialog(frame, "Enter name for Player 2 (Black):");
+
+        if (player1 != null && player2 != null && !player1.trim().isEmpty() && !player2.trim().isEmpty()) {
+            setPlayer1Name(player1);
+            setPlayer2Name(player2);
+            restartGame();
+        } else {
+            JOptionPane.showMessageDialog(frame, "Invalid player names. Game not started.");
+        }
+    }
+
+    private void logout() {
+        // Close the current game window and show the login screen
+        JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        currentFrame.dispose();
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame loginFrame = new JFrame("Chess Game Login");
+            loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            loginFrame.setSize(400, 300);
+
+            // You'll need to implement a method to show the login panel
+            // This is just a placeholder - you should implement this method in your Main class
+            Main.displayLoginPage(loginFrame);
+
+            loginFrame.setLocationRelativeTo(null);
+            loginFrame.setVisible(true);
+        });
+    }
+
 
     private void copyPieces(ArrayList<Piece> source, ArrayList<Piece> target) {
         target.clear();
@@ -563,6 +658,7 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
+        setComponentZOrder(optionsButton, 0);
 
         // Call Board draw method
         board.draw(g2);
