@@ -48,7 +48,7 @@ public class Main {
     }
 
     // Display login page
-    private static void displayLoginPage(JFrame window) {
+    static void displayLoginPage(JFrame window) {
         window.getContentPane().removeAll();
 
         JPanel loginPanel = new JPanel();
