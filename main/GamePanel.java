@@ -3,6 +3,10 @@ package main;
 import piece.*;
 
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -136,6 +140,29 @@ public class GamePanel extends JPanel implements Runnable {
         pieces.add(new Queen(BLACK, 3, 0));
 
     }
+
+    // Update Game Stats
+    private void updateGameStats(String result) {
+        String query = "INSERT INTO game_stats (white_player, black_player, result) VALUES (?, ?, ?)";
+
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DatabaseInformation.DatabaseName,
+                DatabaseInformation.DatabaseUser,
+                DatabaseInformation.DatabasePassword);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, player1Name);
+            pstmt.setString(2, player2Name);
+            pstmt.setString(3, result);
+
+            pstmt.executeUpdate();
+
+            System.out.println("Game result recorded in database.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error recording game result in database.");
+        }
+    }
+
 
     // Three Dot options menu
     private void createOptionsMenu() {
@@ -302,8 +329,11 @@ public class GamePanel extends JPanel implements Runnable {
                         }
                         if (isKingIsInCheck() && isCheckMate()) {
                             gameOver = true;
+                            String result = (currentColor == WHITE) ? "WHITE_WIN" : "BLACK_WIN";
+                            updateGameStats(result);
                         } else if (isStalemate() && !isKingIsInCheck()) {
                             stalemate = true;
+                            updateGameStats("TIE");
                         } else {
                             if (canPromote()) {
                                 promotion = true;
