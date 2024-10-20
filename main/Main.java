@@ -17,11 +17,15 @@ public class Main {
         JFrame window = new JFrame("Pro Chess Game by Niraj");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.setSize(400, 300);
+        window.setSize(400, 400); // Increased height to accommodate stats
 
-        // Home Page with Login and New User options
+        // Home Page with Game Stats, Login, and New User options
         JPanel homePanel = new JPanel();
-        homePanel.setLayout(new GridLayout(3, 1));
+        homePanel.setLayout(new GridLayout(4, 1)); // Increased to 4 rows
+
+        // Add game stats panel
+        JPanel statsPanel = createGameStatsPanel();
+        homePanel.add(statsPanel);
 
         JButton loginButton = new JButton("Login");
         JButton newUserButton = new JButton("Register New User");
@@ -35,6 +39,30 @@ public class Main {
 
         loginButton.addActionListener(e -> displayLoginPage(window));
         newUserButton.addActionListener(e -> displayRegisterPage(window, homePanel));
+    }
+
+    private static JPanel createGameStatsPanel() {
+        JPanel statsPanel = new JPanel();
+        statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
+        statsPanel.setBorder(BorderFactory.createTitledBorder("Game Statistics"));
+
+        String query = "SELECT result, COUNT(*) as count FROM game_stats GROUP BY result";
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                String result = rs.getString("result");
+                int count = rs.getInt("count");
+                JLabel statLabel = new JLabel(result + ": " + count);
+                statsPanel.add(statLabel);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            statsPanel.add(new JLabel("Error retrieving game statistics."));
+        }
+
+        return statsPanel;
     }
 
     // Connect to MySQL Database
